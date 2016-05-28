@@ -1,0 +1,86 @@
+
+    Foosh is part of POSIX Exempli Gratia (POSIX by example)
+
+    Copyright (c) 2015 Francisco Jose Monaco <monaco@icmc.usp.br>
+
+    This is Free Open Source Software. For licensing, see COPYING
+
+    POSIX-eg repository can be found at https://gitlab.com/monaco/posixeg
+
+
+OVERVIEW
+--------------------------------------------------
+
+Foosh - The Foo Shell
+
+Foosh is a minimal bolierplate for a shell command line interpreter.
+
+The example reads strings from the standard input and parse it.
+
+No command execution is actually performand.
+
+Foosh implements the trivial command line grammar defined by libtparser.
+
+Implementation of pipeline execution is left as an exercise.
+
+INSTRUCTIONS
+--------------------------------------------------
+
+BUILD AND INSTALL
+--------------------------------------------------
+
+Your project's development environment shall rely on the GNU Build system
+(Autotools).  Developers may be able to bootstrap the project by issuing
+
+  $ cd yourproject
+  $ ./autogen.sh
+
+The provided autogen.sh script should execute autoconf, automake, libtool
+and related programs in the right order.
+
+Builders should be able to run
+
+ $ ./configure --prefix=<somepath>
+ $ make
+ $ make install
+
+Builders should also be able to create distribution archives
+
+ $ make dist
+
+The distributed files should contain all the files needed for building your
+project at the builder's environment, without the need of Autotools.
+
+THIS IS A PROVISIONAL PIECE OF INFORMATION.
+--------------------------------------------------
+
+PLEASE, BE AWARE OF UPDATES.
+
+Follow the same rules of exercise runcmd where applicable.
+In special:
+
+   Your implementation must use **exclusively** the standard C library (aka libc)
+   and no other external library. This is part of the execise.
+
+   The implementation must be adherent to standards ISO/ANSI/Standard C (c89/90)
+   and POSIX (IEEE 1003.1-2008). The evaluation of the exercise will be performed
+   by compiling your library with
+
+   gcc -Wall -Werror --ansi --pedantic-errors -D_POSIX_C_SOURCE=200809L
+
+Please, keep an eye on the FAQ (to be extended)
+
+   Q: Should my shell be named foosh?
+   A: For God, no! 
+
+   Q: May my shell be more complex than foosh specs?
+   A: Sure.
+
+   Q: Must I use libtparse?
+   A: No.
+
+   Q: May I use libtparse?
+   A: Yes. In this case, consider it installed in the users system.
+ 
+   Q: May I use bison/yacc for the parser?
+   A: Yes.

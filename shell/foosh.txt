@@ -1,0 +1,253 @@
+FOOSH(1)                          The Foo Shell                          FOOSH(1)
+
+NAME
+
+      foosh - The Foo Shell
+
+SYNOPSIS
+
+      foosh [options] [arguments]
+
+DESCRIPTION
+
+      Foosh is a sh-like shell implementing basic command line execution with 
+      input/output redirection, pipeline and job control. 
+
+OPTIONS
+
+      --command      interpret the first non-option arguments as a string
+                     containing a command to be executed.
+      --version      outputs version information.
+      
+      Short options
+
+      -c            Same as --command
+
+INVOCATION
+
+      If an option is not present and an argument is given, this is interpreted
+      as the name of file containing a script to be executed (see section SCRIPTS).
+
+      
+SHELL GRAMMAR
+
+      In Foosh's command line grammar
+
+        a blank is space or tab character
+	a control is one of the following unquoted characters: > < & |
+	a word is a sequence of non-blank characters
+
+      Foosh interprets the following structures.
+
+      A command is a sequence of words separated by blanks.
+
+          Example:
+
+       	  prog arg1 arg2
+
+      The first word is interpreted as a program to be executed and the 
+      following words interpreted as arguments to be passed to the program. If 
+      program is one of the recognized built-in commands, that command is 
+      executed by the shell itself. If the program is not a built-in command,
+      foosh interpret it as the name of an external program to be executed in 
+      a subprocess.  In the preceding example, the program prog would be 
+      executed with arguments arg1 and arg2.
+
+      A pipeline is a sequence of one or more commands separated by the
+      pipeline control character |.
+
+         Examples:
+
+         progA argA1 argA2 | progB argB1  | progC 
+
+     The standard output of the first program is redirected to the standard 
+     input of the second program, and so on, recursively. In the preceding
+     example, standard output of program progA is redirected to the standard
+     input of the pipeline progB argB1 | prog C. In a pipeline, all the
+     commands run in parallel. Foosh supports an unlimited number of commands
+     in a pipeline.
+
+ENVIRONMENT
+
+      All process in a pipeline inherits foosh's environment.
+
+      For program execution, foosh looks for executables in the directories
+      indicated by the environment variable PATH.
+
+BACKGROUND EXECUTION
+
+     Normally, a pipeline will run in foreground. That means the shell process 
+     will suspend while the pipeline is executed. A pipeline can be also run
+     in background mode. This is done by appending a control & at the end of 
+     the pipeline command line. 
+
+         Example:
+
+	 prog arg1 arg2 &
+         progA | progB &
+
+    In background mode, the shell is not suspended while the programs execute.
+
+    Process in a foreground pipeline retain the control of the terminal, while
+    processes in a background job do not (see section JOB CONTROL).	     
+    
+
+IO REDIRECTION
+
+     A pipeline may have its standard input and outputs redirected to a file by
+     appending it a control character > or <, followed by a word.
+
+         Example
+
+	 prog arg1 arg2 > out.txt
+
+     The character > stands for output redirection, while < stands for input 
+     redirection. In the preceding example, the standard output of the program
+     prog would be redirected to out.txt. If the file do not exist, it is 
+     created with read-write permission for the calling process.
+
+     Both input and output may be redirected in a pipeline.
+
+     	 Example
+
+	 prog arg1 arg2 < in.txt > out.txt
+	 prog arg1 arg2 > out.txt < in.txt
+
+     In these two examples, progm's output is redirected to out.txt and progm's
+     input is redirected to in.txt.  
+
+     A pipeline whose IO has been redirected can also be run in background.
+
+       Example:
+
+       prog arg1 arg2 > out.txt &
+
+
+    If the standard input or output of a multiple-command pipeline is redirected
+    this affect, respectively, the standard input of the first command and the
+    standard output of the last command.
+
+       Example:
+
+       progA | progB | progC > out.txt < in.txt
+
+    example, progA's standard input is redirected to in.txt, and progC's 
+    standard output is redirected to out.txt.
+
+JOB CONTROL	
+
+    Every executed pipeline is assigned a new job, identified by a unique 
+    integer value referred as a job id. Jobs are inserted in a list of active
+    when started, and are removed from the list upon completion.
+    
+    Foosh's built-in command 'jobs' (see section BUILT-IN COMMANDS) exhibits a 
+    list of active jobs.
+
+    When a job is executed, foosh creates a new process group and assings
+    it all the processes in the job.
+
+    Processes in foreground job have control of foosh's terminal during
+    execution. Processes in background job does not have access to the terminal.
+    If a process in a background job tries read from shell's terminal, it is
+    suspended by a signal SIGTTIN. 
+
+    A command line with the control character '&' is executed as a background
+    job (see section BACKGROUND EXECUTION). A background job may be sent to
+    foreground with the built-in foosh command 
+
+        fg <job-id>
+
+    where job-id is the id of the target job.
+
+    The built-in command 
+
+        bg <job-id> 
+
+    transfers a suspended job to background mode.
+
+    If foosh receives a signal SIGINT while executing a foreground job, this
+    job is terminated. If the signal is SIGTSTP, the job is suspended. If no
+    process is running in foreground, foosh simply discard the signal.
+
+    The return status of a job is the result status of the last command
+    in the pipeline.
+
+BUILT-IN COMMANDS
+
+    A built in command is reserved word is interpreted by foosh as an action
+    to be performed by the shell itself, rather than the name of an external 
+    program.  
+
+    Foosh recognizes the following built-in commands.
+
+    cd <path>     	 makes the directory 'path' the current directory
+
+    exit		 terminates foosh
+
+    quit		 same as exit
+
+    fg [job-id]          sends job identified by jobid to foreground. If jobid
+                         is not specified, defaults to job which sate has been
+			 most recently modified.
+    bg [job-id]          sends job identified by jobid to background. If jobid
+                         is not specified, defaults to job which sate has been
+			 most recently modified.
+    jobs                 output a list of currently active jobs
+
+    If a built-in command conflicts with the name of an external program, the
+    built in command prevails --- unless the program path is explicitly given.
+
+    A built-in command may appear as command in multiple-command pipeline.
+
+SCRIPTS
+
+    Foosh reads an script file line by line. Every line is interpreted as a 
+    command line to be executed (see section SHELL GRAMMAR).
+
+    Every command line is run as new job.
+
+RETURN VALUE
+
+       On success, foosh returns 0; on failure, it returns nonzero.
+
+CONFORMING TO
+
+	POSIXeg v1.
+
+NOTES
+
+
+EXAMPLE
+
+	(to be written)
+
+SEE ALSO
+
+        POSIXeg documentation.
+
+AUTHORS
+
+	 foosh skeleton was written by Monaco F. J. as part of POSIXeg project.
+
+REPORTING BUGS
+
+	Bugs may be reported to monaco@icmc.usp.br.
+
+COLOPHON
+
+	The implementation of foosh provided by POSIXeg is a skeleton to be
+	developed as an exercise. The work consists in completing the 
+	implementation to meet the specifications outlined in this man-page-like
+	documentation file, and according to directions in file README. Good job.
+
+COPYRIGHT
+
+	This file is part of part of POSIX Exempli Gratia - POSIXeg.
+    	Copyright (c) 2015 Francisco Jose Monaco <monaco@icmc.usp.br>
+    	POSIXeg is Free Open Source Software, distributed under the terms of the
+	General Public License version 3 any later version. You may obtain a 
+	copy of the license and the source code from POSIXeg repository at 
+	https://gitlab.com/monaco/posixeg
+
+
+

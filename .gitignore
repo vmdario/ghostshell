@@ -30,3 +30,13 @@
 
 # Debug files
 *.dSYM/
+
+# Autotools files and folders
+*~
+*.cache
+*.m4
+config.*
+libtool
+stamp-h1
+/buid-aux/
+/m4/
