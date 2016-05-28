@@ -37,6 +37,7 @@
 *.m4
 config.*
 libtool
+Makefile.in
 stamp-h1
 /buid-aux/
 /m4/
