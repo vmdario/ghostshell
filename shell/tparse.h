@@ -8,12 +8,12 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -31,15 +31,15 @@
 
 typedef struct buffer_t
 {
-  int size;			/* Current buffer size. */
-  int length;			/* Current string lenght. */
-  char *buffer;			/* String. */
+    int size;     /* Current buffer size. */
+    int length;     /* Current string lenght. */
+    char *buffer;     /* String. */
 } buffer_t;
 
-/* Return a pointer to a newly allocated and properly initialized 
+/* Return a pointer to a newly allocated and properly initialized
    buffer_t block or NULL on error. */
 
-buffer_t * new_command_line (void);
+buffer_t *new_command_line (void);
 
 /* Release all the memory used by a buffer_t block. */
 
@@ -49,21 +49,21 @@ void release_command_line (buffer_t *);
    grows as needed in steps of BUFFER_STEP bytes. Buffer does not
    shrinks autmatically.*/
 
-int read_command_line (buffer_t *); 
+int read_command_line (buffer_t *);
 
-#define FOREGROUND 0		/* Run in foregroud. */
-#define BACKGROUND 1		/* Run in background. */
+#define FOREGROUND 0    /* Run in foregroud. */
+#define BACKGROUND 1    /* Run in background. */
 
 /* Struct representing a pipeline. */
 
 typedef struct pipeline_t
 {
-  char ***command;		/* Command line (grows unboundedly). */
-  char file_in[MAX_FILENAME];	/* Redirect input from this file. */
-  char file_out[MAX_FILENAME];	/* Redirect output to this file. */
-  int ground;			/* Either FOREGROUND or BACKGROUND. */
-  int ncommands;		/* Number of commands */
-  int narguments[MAX_COMMANDS];	/* Number of arguments in each command. */
+    char ** *command;   /* Command line (grows unboundedly). */
+    char file_in[MAX_FILENAME]; /* Redirect input from this file. */
+    char file_out[MAX_FILENAME];  /* Redirect output to this file. */
+    int ground;     /* Either FOREGROUND or BACKGROUND. */
+    int ncommands;    /* Number of commands */
+    int narguments[MAX_COMMANDS]; /* Number of arguments in each command. */
 } pipeline_t;
 
 
@@ -79,7 +79,7 @@ void release_pipeline (pipeline_t *);
 /* Parse a command line stored in a buffer_t struct and fill in the
    corresponding fields of the target pipeline_t struct. */
 
-int parse_command_line (buffer_t*, pipeline_t*);
+int parse_command_line (buffer_t *, pipeline_t *);
 
 /* Handy macros to check execution mode. */
 
@@ -93,7 +93,7 @@ int parse_command_line (buffer_t*, pipeline_t*);
 void pripeline_info (pipeline_t *pipeline);
 
 
-char * stringdup (const char *);
+char *stringdup (const char *);
 
 
-#endif	/* TPARSE_H */
+#endif  /* TPARSE_H */
