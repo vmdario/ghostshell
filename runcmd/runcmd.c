@@ -81,7 +81,7 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
 
     if (result)
         *result = tmp_result;
-
+    *result = aux;
     free (p);
     return pid;     /* Only parent reaches this point. */
 }

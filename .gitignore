@@ -1,3 +1,16 @@
+# Autotools files and folders
+*~
+*.cache
+*.m4
+config.*
+libtool
+Makefile.in
+stamp-h1
+/build-aux/
+/m4/
+.libs/
+.deps/
+
 # Object files
 *.o
 *.ko
@@ -13,8 +26,6 @@
 *.a
 *.la
 *.lo
-/.libs/
-/.deps/
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -32,14 +43,3 @@
 
 # Debug files
 *.dSYM/
-
-# Autotools files and folders
-*~
-*.cache
-*.m4
-config.*
-libtool
-Makefile.in
-stamp-h1
-/buid-aux/
-/m4/
