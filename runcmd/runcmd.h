@@ -1,21 +1,21 @@
 /* runcmd.h - Header of libruncmd.
 
-   Copyright (c) 2014, Francisco José Monaco <moanco@icmc.usp.br>
+   Copyright (c) 2016, Victor Municelli Dario <vmunidario@usp.br>
 
-   This file is part of POSIXeg
+    This file is part of GhostShell.
 
-   POSIXeg is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    GhostShell is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
 */
 
@@ -60,15 +60,16 @@
 #define IS_EXECOK(result)   ((result & EXECOK) && 1)
 
 /* Subprocess' exit status upon exec failure.*/
-
 #define EXECFAILSTATUS 127
 
 /* Run a command in a subprocess. */
-
 int runcmd (const char *command, int *result, int *io);
 
 /* Hanlder for SIGCHLD in nonblock mode. */
-
 extern void (*runcmd_onexit)(void);
+
+int run_commands_from_string(const char *);
+
+int run_commands_from_file(const char *);
 
 #endif	/* RUNCMD_H */

@@ -1,21 +1,21 @@
 /* runcmd.c - Execute a command as a subprocess.
 
-   Copyright (c) 2014, Francisco José Monaco <moanco@icmc.usp.br>
+   Copyright (c) 2016, Victor Municelli Dario <vmunidario@usp.br>
 
-   This file is part of POSIXeg
+    This file is part of GhostShell.
 
-   POSIXeg is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+    GhostShell is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -38,18 +38,14 @@
    file descriptors to where standard input, output and error, respective,
    shall be redirected; if NULL, no redirection is performed. On
    success, returns subprocess' pid; on error, returns 0. */
-
 int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
 {
     int pid, status;
     int aux, i, tmp_result;
     char *args[RCMD_MAXARGS], *p, *cmd;
-
-
     tmp_result = 0;
 
     /* Parse arguments to obtain an argv vector. */
-
     cmd = malloc ((strlen (command) + 1) * sizeof(char));
     sysfail (!cmd, -1);
     p = strcpy (cmd, command);
@@ -60,13 +56,12 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
     i--;
 
     /* Create a subprocess. */
-
     pid = fork();
     sysfail (pid < 0, -1);
 
     if (pid > 0)      /* Caller process (parent). */
     {
-        aux = wait (&status);
+        aux = wait(&status);
         sysfail (aux < 0, -1);
 
         /* Collect termination mode. */
@@ -75,13 +70,13 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
     }
     else        /* Subprocess (child) */
     {
-        aux = execvp (args[0], args);
+        execvp(args[0], args);
+        printf("Error: %s\n", strerror(errno));
         exit (EXECFAILSTATUS);
     }
 
     if (result)
         *result = tmp_result;
-    *result = aux;
     free (p);
     return pid;     /* Only parent reaches this point. */
 }
@@ -90,6 +85,20 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
    pointed by rcmd_onexit is asynchronously evoked upon the subprocess
    termination. If this variable points to NULL, no action is performed.
 */
-
 void (*runcmd_onexit)(void) = NULL;
+
+int run_commands_from_string(const char *str)
+{
+
+}
+
+int run_commands_from_file(const char *file)
+{
+
+}
+
+
+
+
+
 

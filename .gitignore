@@ -6,8 +6,8 @@ config.*
 libtool
 Makefile.in
 stamp-h1
-/build-aux/
-/m4/
+build-aux/
+m4/
 .libs/
 .deps/
 
@@ -43,3 +43,5 @@ stamp-h1
 
 # Debug files
 *.dSYM/
+.project
+.cproject

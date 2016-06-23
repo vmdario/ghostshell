@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -25,11 +24,9 @@
 
 #include <tparse.h>
 
-
 #define BUFFER_STEP 512
 
 /* Alocate memory for a command_t. */
-
 buffer_t *new_command_line (void)
 {
     buffer_t *command_line;
@@ -46,20 +43,15 @@ buffer_t *new_command_line (void)
 }
 
 /* Release a command_t's memory. */
-
 void release_command_line (buffer_t *command_line)
 {
     free (command_line->buffer);
     free (command_line);
 }
 
-
-
 /* Read a line from standard input and store it in command_line->buffer.
    The buffer size is enlarged if needed in steps of size BUFFER_STEP.
    Return the number of bytes read or -1 on error. */
-
-
 int read_command_line (buffer_t *command_line)
 {
     int read_bytes, count, temp;
@@ -72,10 +64,8 @@ int read_command_line (buffer_t *command_line)
     howmany = command_line->size;
     while (read_more)
     {
-
         /* Read howmany bytes. */
-
-        read_bytes = read (1, offset, howmany);
+        read_bytes = read(1, offset, howmany);
         count += read_bytes;
 
         /* This happens also if the previous read left
@@ -87,7 +77,6 @@ int read_command_line (buffer_t *command_line)
             return --count;
         }
 
-
         read_more = 0;
         if (read_bytes < howmany)
             offset[read_bytes - 1] = '\0'; /* We read less than howmany; done. */
@@ -96,7 +85,6 @@ int read_command_line (buffer_t *command_line)
         else             /* There is more to read. */
         {
             /* Enlarge buffer. */
-
             temp = command_line->size;
             p = realloc (command_line->buffer, (temp + BUFFER_STEP) * sizeof(char));
             sysfail (!p, -1);
@@ -115,9 +103,56 @@ int read_command_line (buffer_t *command_line)
     return count;
 }
 
+int read_command_line_from_file(int file, buffer_t *command_line)
+{
+    int read_bytes, count, temp;
+    int read_more = 1;
+    char *offset, *p;
+    int howmany;
+
+    count = 0;
+    offset = command_line->buffer;
+    howmany = command_line->size;
+    while (read_more)
+    {
+        /* Read howmany bytes. */
+        read_bytes = read(file, offset, howmany);
+        count += read_bytes;
+
+        /* This happens also if the previous read left
+        a trailing newline. */
+        if (offset[0] == '\n')
+        {
+            offset[0] = '\0';
+            command_line->length = 0;
+            return --count;
+        }
+
+        read_more = 0;
+        if (read_bytes < howmany)
+            offset[read_bytes - 1] = '\0'; /* We read less than howmany; done. */
+        else if (offset[read_bytes - 1] == '\n')
+            offset[read_bytes - 1] = '\0'; /* We read exactly howmany; done. */
+        else             /* There is more to read. */
+        {
+            /* Enlarge buffer. */
+            temp = command_line->size;
+            p = realloc (command_line->buffer, (temp + BUFFER_STEP) * sizeof(char));
+            sysfail (!p, -1);
+
+            /* Offest is the end of the buffer. */
+            offset = command_line->buffer + count;
+            command_line->size += BUFFER_STEP;
+            howmany = BUFFER_STEP;
+
+            read_more = 1;
+        }
+    }
+    command_line->length = count;
+    return count;
+}
 
 /* Allocate memory for a new pipeline. */
-
 pipeline_t *new_pipeline (void)
 {
     pipeline_t *pipeline;
@@ -128,7 +163,6 @@ pipeline_t *new_pipeline (void)
 
 
     /* Allocate a pipeline structure. */
-
     pipeline->command = malloc ((MAX_COMMANDS + 1) * sizeof(char **));
     if (!pipeline->command)
     {

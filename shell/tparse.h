@@ -28,7 +28,6 @@
 #define MAX_FILENAME 1024  /* Maximum length of a filename IO redirection).*/
 
 /* Struct to read the command line. */
-
 typedef struct buffer_t
 {
     int size;     /* Current buffer size. */
@@ -38,18 +37,20 @@ typedef struct buffer_t
 
 /* Return a pointer to a newly allocated and properly initialized
    buffer_t block or NULL on error. */
-
 buffer_t *new_command_line (void);
 
 /* Release all the memory used by a buffer_t block. */
-
 void release_command_line (buffer_t *);
 
 /* Read a line from STDIN into a buffer_t block. The buffer
    grows as needed in steps of BUFFER_STEP bytes. Buffer does not
    shrinks autmatically.*/
-
 int read_command_line (buffer_t *);
+
+/* Read a line from file into a buffer_t block. The buffer
+   grows as needed in steps of BUFFER_STEP bytes. Buffer does not
+   shrinks autmatically.*/
+int read_command_line_from_file(int, buffer_t *);
 
 #define FOREGROUND 0    /* Run in foregroud. */
 #define BACKGROUND 1    /* Run in background. */
@@ -78,11 +79,9 @@ void release_pipeline (pipeline_t *);
 
 /* Parse a command line stored in a buffer_t struct and fill in the
    corresponding fields of the target pipeline_t struct. */
-
 int parse_command_line (buffer_t *, pipeline_t *);
 
 /* Handy macros to check execution mode. */
-
 #define RUN_FOREGROUND(pipeline) (pipeline->ground == FOREGROUND)
 #define RUN_BACKGROUND(pipeline) (pipeline->ground == BACKGROUND)
 #define REDIRECT_STDIN(pipeline) (pipeline->file_in[0] != '\0')
