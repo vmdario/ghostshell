@@ -29,6 +29,7 @@
 void show_version();
 
 int go_on = 1; /* This variable controls the main loop. */
+char pwd[MAX_FILENAME]; /* current directory */
 
 int main(int argc, char **argv)
 {
@@ -36,7 +37,6 @@ int main(int argc, char **argv)
     int i, j, aux, pid, result;
     int *io = NULL;
     char cmd[RCMD_MAXARGS];
-    char pwd[MAX_FILENAME];
     pipeline_t *pipeline;
 
     getcwd(pwd, MAX_FILENAME);
