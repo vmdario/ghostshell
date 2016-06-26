@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
-
+#include <fcntl.h>
 #include <runcmd.h>
 #include <debug.h>
 
@@ -86,19 +86,3 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
    termination. If this variable points to NULL, no action is performed.
 */
 void (*runcmd_onexit)(void) = NULL;
-
-int run_commands_from_string(const char *str)
-{
-
-}
-
-int run_commands_from_file(const char *file)
-{
-
-}
-
-
-
-
-
-

@@ -23,6 +23,7 @@
 #include <tparse.h>
 #include <debug.h>
 #include <runcmd.h>
+#include "run_commands.h"
 
 #define PROMPT "@:"
 

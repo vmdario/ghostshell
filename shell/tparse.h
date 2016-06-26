@@ -50,7 +50,7 @@ int read_command_line (buffer_t *);
 /* Read a line from file into a buffer_t block. The buffer
    grows as needed in steps of BUFFER_STEP bytes. Buffer does not
    shrinks autmatically.*/
-int read_command_line_from_file(int, buffer_t *);
+int read_command_line_from_file(int, buffer_t *, int *);
 
 #define FOREGROUND 0    /* Run in foregroud. */
 #define BACKGROUND 1    /* Run in background. */
@@ -88,9 +88,7 @@ int parse_command_line (buffer_t *, pipeline_t *);
 #define REDIRECT_STDOUT(pipeline) (pipeline->file_out[0] != '\0')
 
 /* Output information of pipeline for debugging purposes. */
-
 void pripeline_info (pipeline_t *pipeline);
-
 
 char *stringdup (const char *);
 

@@ -103,51 +103,28 @@ int read_command_line (buffer_t *command_line)
     return count;
 }
 
-int read_command_line_from_file(int file, buffer_t *command_line)
+int read_command_line_from_file(int file, buffer_t *command_line, int *error)
 {
-    int read_bytes, count, temp;
-    int read_more = 1;
-    char *offset, *p;
-    int howmany;
-
+    int read_bytes, count, i;
     count = 0;
-    offset = command_line->buffer;
-    howmany = command_line->size;
-    while (read_more)
-    {
-        /* Read howmany bytes. */
-        read_bytes = read(file, offset, howmany);
-        count += read_bytes;
-
-        /* This happens also if the previous read left
-        a trailing newline. */
-        if (offset[0] == '\n')
-        {
-            offset[0] = '\0';
-            command_line->length = 0;
-            return --count;
-        }
-
-        read_more = 0;
-        if (read_bytes < howmany)
-            offset[read_bytes - 1] = '\0'; /* We read less than howmany; done. */
-        else if (offset[read_bytes - 1] == '\n')
-            offset[read_bytes - 1] = '\0'; /* We read exactly howmany; done. */
-        else             /* There is more to read. */
-        {
-            /* Enlarge buffer. */
-            temp = command_line->size;
-            p = realloc (command_line->buffer, (temp + BUFFER_STEP) * sizeof(char));
-            sysfail (!p, -1);
-
-            /* Offest is the end of the buffer. */
-            offset = command_line->buffer + count;
-            command_line->size += BUFFER_STEP;
-            howmany = BUFFER_STEP;
-
-            read_more = 1;
-        }
-    }
+    read_bytes = 1;
+	for(i = 0; i < command_line->size; ++i)
+	{
+		/* Read one line */
+		read_bytes = read(file, &command_line->buffer[i], 1);
+		if(read_bytes < 0) {
+			*error = 1;
+			return -1;
+		}
+		if(read_bytes == 0) {
+			return -1; /* EOF */
+		}
+		if(command_line->buffer[i] == '\n') {
+			break;
+		}
+		count += read_bytes;
+	}
+	command_line->buffer[i] = '\0';
     command_line->length = count;
     return count;
 }
@@ -316,15 +293,13 @@ int parse_command_line (buffer_t *command_line, pipeline_t *pipeline)
     truncated |= find_modifiers (command_line, pipeline);
 
     i = 0;
-    while((i < MAX_COMMANDS) &&
-            (token = strtok_r (i == 0 ? command_line->buffer : NULL, "|", &bkstring)))
+    while((i < MAX_COMMANDS) && (token = strtok_r (i == 0 ? command_line->buffer : NULL, "|", &bkstring)))
     {
         while ((token[0] == ' ') || (token[0] == '\t'))
             token++;
 
         j = 0;
-        while ((j < MAX_ARGUMENTS) &&
-                (token2 = strtok (j == 0 ? token : NULL, " \t")))
+        while ((j < MAX_ARGUMENTS) && (token2 = strtok (j == 0 ? token : NULL, " \t")))
         {
             pipeline->command[i][j] = token2;
             j++;
@@ -348,9 +323,3 @@ int parse_command_line (buffer_t *command_line, pipeline_t *pipeline)
 
     return truncated;
 }
-
-
-
-
-
-

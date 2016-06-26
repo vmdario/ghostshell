@@ -68,8 +68,4 @@ int runcmd (const char *command, int *result, int *io);
 /* Hanlder for SIGCHLD in nonblock mode. */
 extern void (*runcmd_onexit)(void);
 
-int run_commands_from_string(const char *);
-
-int run_commands_from_file(const char *);
-
 #endif	/* RUNCMD_H */

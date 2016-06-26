@@ -104,7 +104,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ghostshell_OBJECTS = main.$(OBJEXT) list.$(OBJEXT) parser.$(OBJEXT)
+am_ghostshell_OBJECTS = main.$(OBJEXT) list.$(OBJEXT) parser.$(OBJEXT) \
+	run_commands.$(OBJEXT)
 ghostshell_OBJECTS = $(am_ghostshell_OBJECTS)
 ghostshell_DEPENDENCIES = ../runcmd/libruncmd.la $(LIBOBJS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -301,7 +302,7 @@ AM_CPPFLAGS = -I$(srcdir)/shell -I$(top_srcdir)/runcmd
 AM_CFLAGS =  -pthread 
 AM_LDFLAGS =  
 LADD = 
-ghostshell_SOURCES = main.c list.c parser.c debug.h list.h tparse.h
+ghostshell_SOURCES = main.c list.c parser.c run_commands.c debug.h list.h tparse.h run_commands.h
 ghostshell_LDADD = ../runcmd/libruncmd.la $(LIBOBJS) 
 ghostshell_LIBS = 
 all: all-am
@@ -400,6 +401,7 @@ distclean-compile:
 include ./$(DEPDIR)/list.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/parser.Po
+include ./$(DEPDIR)/run_commands.Po
 
 .c.o:
 	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
