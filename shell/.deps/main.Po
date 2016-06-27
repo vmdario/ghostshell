@@ -26,11 +26,14 @@ main.o: main.c /usr/include/stdc-predef.h /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
- tparse.h debug.h /usr/include/string.h /usr/include/xlocale.h \
- /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
- /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
+ /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
+ /usr/include/x86_64-linux-gnu/bits/stat.h tparse.h debug.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/errno.h \
+ /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- ../runcmd/runcmd.h run_commands.h
+ ../runcmd/runcmd.h run_commands.h tparse.h
 
 /usr/include/stdc-predef.h:
 
@@ -108,6 +111,14 @@ main.o: main.c /usr/include/stdc-predef.h /usr/include/stdlib.h \
 
 /usr/include/getopt.h:
 
+/usr/include/fcntl.h:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl.h:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl-linux.h:
+
+/usr/include/x86_64-linux-gnu/bits/stat.h:
+
 tparse.h:
 
 debug.h:
@@ -131,3 +142,5 @@ debug.h:
 ../runcmd/runcmd.h:
 
 run_commands.h:
+
+tparse.h:

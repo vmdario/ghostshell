@@ -19,11 +19,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <debug.h>
 #include <fcntl.h>
 #include "runcmd.h"
 #include "run_commands.h"
-#include "tparse.h"
 
 extern char pwd[MAX_FILENAME];
 
@@ -117,4 +117,41 @@ int run_commands_from_file(const char *path)
 	release_pipeline(pipeline);
 	close(fd);
 	return 0;
+}
+
+int run_pipe(pipeline_t *pipeline, int *io)
+{
+    int i, pid, aux;
+    char *args[RCMD_MAXARGS];
+
+    if( pipe(io) < 0 ) {
+        printf("Error: %s\n", strerror(errno));
+        return 1; /* error */
+    }
+
+    /* Create a subprocess. */
+    pid = fork();
+    sysfail (pid < 0, -1);
+
+    if (pid > 0)      /* Caller process (parent). */
+    {
+        close(io[0]);
+
+        aux = wait(NULL);
+        sysfail (aux < 0, -1);
+    }
+    else        /* Subprocess (child) */
+    {
+        /* Redirection */
+        if(io != NULL) {
+            if(io[0] != -1) { /* stdin */
+                dup2(io[0], 0);
+            }
+            if(io[1] != -1) { /* stdout */
+                dup2(io[1], 1);
+            }
+        }
+        execvp(args[0], args);
+        exit (EXECFAILSTATUS);
+    }
 }

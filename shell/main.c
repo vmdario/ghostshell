@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <tparse.h>
 #include <debug.h>
 #include <runcmd.h>
@@ -28,6 +29,8 @@
 #define PROMPT "@:"
 
 void show_version();
+int open_io(pipeline_t *p, int *io);
+void close_io(pipeline_t *p, int *io);
 
 int go_on = 1; /* This variable controls the main loop. */
 char pwd[MAX_FILENAME]; /* current directory */
@@ -36,12 +39,12 @@ int main(int argc, char **argv)
 {
     buffer_t *command_line;
     int i, j, aux, pid, result;
-    int *io = NULL;
+    int io[3];
     char cmd[RCMD_MAXARGS];
     pipeline_t *pipeline;
 
     getcwd(pwd, MAX_FILENAME);
-
+    io[0] = io[1] = io[2] = -1;
     /*---------------- Checking if options or arguments are passed ------------------*/
     if (argc > 1)
     {
@@ -120,20 +123,30 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    memset(cmd, 0, sizeof (cmd)); /* cleaning cmd buffer */
-                    for (i = 0; pipeline->command[i][0]; i++)
+                    /* Run pipe if pipeline->ncommands > 1 */
+                    if(pipeline->ncommands > 1)
                     {
-                        for (j = 0; pipeline->command[i][j]; j++)
-                        {
-                            strcat(cmd, pipeline->command[i][j]);
-                            strcat(cmd, " ");
-                        }
+                        run_pipe(pipeline, io);
                     }
-
-                    runcmd(cmd, &result, io);
-                    /*if( result < 0 ) {
-                        printf("Error: %d\n", errno);
-                    }*/
+                    else
+                    {
+                        memset(cmd, 0, sizeof (cmd)); /* cleaning cmd buffer */
+                        for (i = 0; pipeline->command[i][0]; i++)
+                        {
+                            for (j = 0; pipeline->command[i][j]; j++)
+                            {
+                                strcat(cmd, pipeline->command[i][j]);
+                                strcat(cmd, " ");
+                            }
+                        }
+                        
+                        if(open_io(pipeline, io)) {
+                            printf("Error: %s\n", strerror(errno));
+                            continue;
+                        }
+                        runcmd(cmd, &result, io);
+                        close_io(pipeline, io);
+                    }
                 }
             }
         }
@@ -146,4 +159,37 @@ int main(int argc, char **argv)
 void show_version()
 {
     printf("GhostShell v%s\n", "0.1");
+}
+
+int open_io(pipeline_t *pipeline, int *io)
+{
+    /* Redirect input */
+    if (pipeline->file_in[0] != '\0')
+    {
+        io[0] = open(pipeline->file_in, O_RDONLY);
+        if (io[0] < 0) {
+            return 1;
+        }
+    }
+    /* Redirect output */
+    if (pipeline->file_out[0] != '\0')
+    {
+        io[1] = open(pipeline->file_out, O_CREAT|O_TRUNC|O_WRONLY, 0644);
+        if (io[1] < 0) {
+            return 1;
+        }
+    }
+    return 0; /* sucesso */
+}
+
+void close_io(pipeline_t *pipeline, int *io)
+{
+    if(io[0] != -1) {
+        close(io[0]);
+        io[0] = -1;
+    }
+    if(io[1] != -1) {
+        close(io[1]);
+        io[1] = -1;
+    }
 }

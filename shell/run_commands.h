@@ -16,11 +16,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef RUNCMDLINE_H
-#define RUNCMDLINE_H
+#ifndef RUNCOMMANDS_H
+#define RUNCOMMANDS_H
+#include "tparse.h"
 
 int run_commands_from_string(const char *);
 
 int run_commands_from_file(const char *);
+
+int run_pipe(pipeline_t *pipeline, int *io);
 
 #endif

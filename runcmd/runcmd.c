@@ -70,6 +70,15 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
     }
     else        /* Subprocess (child) */
     {
+        /* Redirection */
+        if(io != NULL) {
+            if(io[0] != -1) { /* stdin */
+                dup2(io[0], 0);
+            }
+            if(io[1] != -1) { /* stdout */
+                dup2(io[1], 1);
+            }
+        }
         execvp(args[0], args);
         printf("Error: %s\n", strerror(errno));
         exit (EXECFAILSTATUS);
