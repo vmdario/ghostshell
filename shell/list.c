@@ -119,5 +119,3 @@ int del_node (list_t *list, list_node_t *node)
 
   return EXIT_SUCCESS;
 }
-
-

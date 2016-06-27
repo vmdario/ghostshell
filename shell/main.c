@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <runcmd.h>
 #include "run_commands.h"
+#include "job.h"
 
 #define PROMPT "@:"
 
@@ -32,19 +33,22 @@ void show_version();
 int open_io(pipeline_t *p, int *io);
 void close_io(pipeline_t *p, int *io);
 
+list_t *jobs = NULL; /* process list */
 int go_on = 1; /* This variable controls the main loop. */
 char pwd[MAX_FILENAME]; /* current directory */
 
 int main(int argc, char **argv)
 {
     buffer_t *command_line;
-    int i, j, aux, pid, result;
+    int i, j, k, aux, pid, result;
     int io[3];
     char cmd[RCMD_MAXARGS];
     pipeline_t *pipeline;
 
     getcwd(pwd, MAX_FILENAME);
     io[0] = io[1] = io[2] = -1;
+    jobs = new_list(free);
+
     /*---------------- Checking if options or arguments are passed ------------------*/
     if (argc > 1)
     {
@@ -78,6 +82,7 @@ int main(int argc, char **argv)
     /* This is the main loop for parsing and runing commands */
     while (go_on)
     {
+        update_jobs_status();
 		printf("%s%s ", pwd, PROMPT);
 		fflush(stdout);
         aux = read_command_line(command_line);
@@ -111,22 +116,89 @@ int main(int argc, char **argv)
                 }
                 else if(!strcmp(pipeline->command[0][0], "fg"))
                 {
-
+                    list_node_t *n = jobs->first;
+                    if(!n) {
+                        printf("No such job\n");
+                    }
+                    else {
+                        if(pipeline->narguments[0] > 0) {
+                            int num = atoi(pipeline->command[0][1]);
+                            if(num < 0) {
+                                printf("Error: number must be positive\n");
+                                continue;
+                            }
+                            i = 1;
+                            while(n && i < num)
+                            {
+                                n = n->next;
+                                i++;
+                            }
+                            set_job_foreground(n->value->pid);
+                        }
+                    }
                 }
                 else if(!strcmp(pipeline->command[0][0], "bg"))
                 {
-
+                    list_node_t *n = jobs->first;
+                    if(!n) {
+                        printf("No such job\n");
+                    }
+                    else {
+                        if(pipeline->narguments[0] > 0) {
+                            int num = atoi(pipeline->command[0][1]);
+                            if(num < 0) {
+                                printf("Error: number must be positive\n");
+                                continue;
+                            }
+                            i = 1;
+                            while(n && i < num)
+                            {
+                                n = n->next;
+                                i++;
+                            }
+                            set_job_background(n->value->pid);
+                        }
+                    }
                 }
                 else if(!strcmp(pipeline->command[0][0], "jobs"))
                 {
-
+                    list_node_t *n = jobs->first;
+                    while(n)
+                    {
+                        printf("[%d]\t%d\t%s\n", i, n->value->pid, n->value->name);
+                        n = n->next;   
+                    }
                 }
                 else
                 {
                     /* Run pipe if pipeline->ncommands > 1 */
                     if(pipeline->ncommands > 1)
                     {
-                        run_pipe(pipeline, io);
+                        char *cmd1, cmd2[RCMD_MAXARGS];
+                        cmd1 = &cmd[0];
+                        for(i = 0; i < pipeline->ncommands; i += 2)
+                        {
+                            memset(cmd1, 0, sizeof (cmd1)); /* cleaning cmd buffers */
+                            memset(cmd2, 0, sizeof (cmd2));
+
+                            for (j = 0; pipeline->command[i][j]; j++)
+                            {
+                                strcat(cmd1, pipeline->command[i][j]);
+                                strcat(cmd1, " ");
+                            }
+                            for (j = 0; pipeline->command[i+1][j]; j++)
+                            {
+                                strcat(cmd2, pipeline->command[i+1][j]);
+                                strcat(cmd2, " ");
+                            }
+
+                            if(open_io(pipeline, io) < 0) {
+                                printf("Error: %s\n", strerror(errno));
+                                continue;
+                            }
+                            run_pipe(cmd1, cmd2, RUN_FOREGROUND(pipeline), io);
+                            close_io(pipeline, io);
+                        }
                     }
                     else
                     {
@@ -140,11 +212,11 @@ int main(int argc, char **argv)
                             }
                         }
                         
-                        if(open_io(pipeline, io)) {
+                        if(open_io(pipeline, io) < 0) {
                             printf("Error: %s\n", strerror(errno));
                             continue;
                         }
-                        runcmd(cmd, &result, io);
+                        runcmd(cmd, RUN_FOREGROUND(pipeline), &result, io);
                         close_io(pipeline, io);
                     }
                 }
@@ -153,6 +225,7 @@ int main(int argc, char **argv)
     }
     release_command_line(command_line);
     release_pipeline(pipeline);
+    release_list(jobs);
     return EXIT_SUCCESS;
 }
 
@@ -164,32 +237,33 @@ void show_version()
 int open_io(pipeline_t *pipeline, int *io)
 {
     /* Redirect input */
-    if (pipeline->file_in[0] != '\0')
+    if (REDIRECT_STDIN(pipeline))
     {
         io[0] = open(pipeline->file_in, O_RDONLY);
         if (io[0] < 0) {
-            return 1;
+            return -1;
         }
     }
     /* Redirect output */
-    if (pipeline->file_out[0] != '\0')
+    if (REDIRECT_STDOUT(pipeline))
     {
         io[1] = open(pipeline->file_out, O_CREAT|O_TRUNC|O_WRONLY, 0644);
         if (io[1] < 0) {
-            return 1;
+            return -1;
         }
     }
-    return 0; /* sucesso */
+    return 1; /* sucesso */
 }
 
 void close_io(pipeline_t *pipeline, int *io)
 {
-    if(io[0] != -1) {
+    if(REDIRECT_STDIN(pipeline)) {
         close(io[0]);
         io[0] = -1;
     }
-    if(io[1] != -1) {
+    if(REDIRECT_STDOUT(pipeline)) {
         close(io[1]);
         io[1] = -1;
     }
 }
+

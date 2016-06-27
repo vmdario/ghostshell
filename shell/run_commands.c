@@ -24,19 +24,21 @@
 #include <fcntl.h>
 #include "runcmd.h"
 #include "run_commands.h"
+#include "job.h"
 
 extern char pwd[MAX_FILENAME];
+extern list_t *jobs;
 
 int run_commands_from_string(const char *str)
 {
-	printf("%s\n", str);
-	return 0;
+	/*printf("%s\n", str);*/
+	return 1;
 }
 
 int run_commands_from_file(const char *path)
 {
 	int fd, go_on, aux, i, j, error, result;
-	int *io = NULL;
+	int *pfd = NULL;
 	buffer_t *command_line;
 	pipeline_t *pipeline;
 	char cmd[RCMD_MAXARGS];
@@ -45,7 +47,7 @@ int run_commands_from_file(const char *path)
 	if(fd < 0)
 	{
 		printf("Error: %s\n", strerror(errno));
-		return 1;
+		return -1;
 	}
 
 	command_line = new_command_line();
@@ -108,7 +110,7 @@ int run_commands_from_file(const char *path)
 						}
 					}
 
-					runcmd(cmd, &result, io);
+					runcmd(cmd, RUN_FOREGROUND(pipeline), &result, pfd);
 				}
 			}
 		}
@@ -116,42 +118,60 @@ int run_commands_from_file(const char *path)
 	release_command_line(command_line);
 	release_pipeline(pipeline);
 	close(fd);
-	return 0;
+	return 1;
 }
 
-int run_pipe(pipeline_t *pipeline, int *io)
+int run_pipe(char *cmd1, char *cmd2, int fg, int *io)
 {
-    int i, pid, aux;
-    char *args[RCMD_MAXARGS];
+    int i, aux, status;
+    int pfd[2], pid[2];
+    char *args1[RCMD_MAXARGS], *args2[RCMD_MAXARGS];
+    char *cmd;
 
-    if( pipe(io) < 0 ) {
+    if( pipe(pfd) < 0 ) {
         printf("Error: %s\n", strerror(errno));
-        return 1; /* error */
+        return -1; /* error */
     }
 
     /* Create a subprocess. */
-    pid = fork();
-    sysfail (pid < 0, -1);
+    pid[0] = fork();
+    sysfail (pid[0] < 0, -1);
 
-    if (pid > 0)      /* Caller process (parent). */
+    if (pid[0] > 0)      /* Caller process (parent). */
     {
-        close(io[0]);
+    	pid[1] = fork();
+        sysfail(pid[1] < 0, -1);
 
-        aux = wait(NULL);
-        sysfail (aux < 0, -1);
+		if (pid[1] > 0)
+		{
+			/* Parent */
+			/* Set stdout */
+			close(pfd[0]);
+			close(pfd[1]);
+			waitpid (pid[1], &status, 0);
+			printf ("Done waiting for more.\n");
+		}
+		else
+		{
+			/* Child */
+			/* Set stdin  */
+			close (pfd[1]);
+			dup2 (pfd[0], 0);
+			close (pfd[0]);
+
+			execvp (args2[0], args2);
+			exit(EXECFAILSTATUS);
+		}
     }
     else        /* Subprocess (child) */
     {
-        /* Redirection */
-        if(io != NULL) {
-            if(io[0] != -1) { /* stdin */
-                dup2(io[0], 0);
-            }
-            if(io[1] != -1) { /* stdout */
-                dup2(io[1], 1);
-            }
-        }
-        execvp(args[0], args);
+    	close(pfd[0]);
+		dup2 (pfd[1], 1);
+		close (pfd[1]);
+
+		execvp(args1[0], args1);
         exit (EXECFAILSTATUS);
     }
+	return 1;
 }
+

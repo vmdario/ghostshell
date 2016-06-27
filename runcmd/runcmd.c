@@ -38,12 +38,14 @@
    file descriptors to where standard input, output and error, respective,
    shall be redirected; if NULL, no redirection is performed. On
    success, returns subprocess' pid; on error, returns 0. */
-int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
+int runcmd (const char *command, int fg, int *result, int *io) /* ToDO: const char* */
 {
-    int pid, status;
+    int ppid, pid, status;
     int aux, i, tmp_result;
     char *args[RCMD_MAXARGS], *p, *cmd;
     tmp_result = 0;
+
+    /*ppid = getpgid();*/
 
     /* Parse arguments to obtain an argv vector. */
     cmd = malloc ((strlen (command) + 1) * sizeof(char));
@@ -61,7 +63,13 @@ int runcmd (const char *command, int *result, int *io) /* ToDO: const char* */
 
     if (pid > 0)      /* Caller process (parent). */
     {
-        aux = wait(&status);
+        /* run fg or bg */
+        if(fg) {
+            aux = waitpid(pid, &status, 0);
+        }
+        else {
+            aux = run_bg(pid, command);
+        }
         sysfail (aux < 0, -1);
 
         /* Collect termination mode. */

@@ -105,7 +105,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_ghostshell_OBJECTS = main.$(OBJEXT) list.$(OBJEXT) parser.$(OBJEXT) \
-	run_commands.$(OBJEXT)
+	run_commands.$(OBJEXT) job.$(OBJEXT)
 ghostshell_OBJECTS = $(am_ghostshell_OBJECTS)
 ghostshell_DEPENDENCIES = ../runcmd/libruncmd.la $(LIBOBJS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -302,7 +302,7 @@ AM_CPPFLAGS = -I$(srcdir)/shell -I$(top_srcdir)/runcmd
 AM_CFLAGS =  -pthread 
 AM_LDFLAGS =  
 LADD = 
-ghostshell_SOURCES = main.c list.c parser.c run_commands.c debug.h list.h tparse.h run_commands.h
+ghostshell_SOURCES = main.c list.c parser.c run_commands.c debug.h list.h tparse.h run_commands.h job.h job.c
 ghostshell_LDADD = ../runcmd/libruncmd.la $(LIBOBJS) 
 ghostshell_LIBS = 
 all: all-am
@@ -398,6 +398,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/job.Po
 include ./$(DEPDIR)/list.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/parser.Po

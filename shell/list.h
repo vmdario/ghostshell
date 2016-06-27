@@ -21,20 +21,20 @@
 #ifndef LIST_H
 #define LIST_H
 
+typedef struct _job_t job_t;
+
 /* Struct representing a node in double-linked list. 
    Nodes have a (void*) value which you can point to whatever kind
    of data you want. */
-
 typedef struct list_node_t list_node_t;
 struct list_node_t
 {
   list_node_t *next;		/* Link to the next node. */
   list_node_t *previous;	/* Link to the previous node. */
-  void *value;			/* Value associated to the node. */
+  job_t *value;			/* Value associated to the node. */
 };
 
 /* Struct representing a double-linked list. */
-
 typedef struct list_t
 {
   int size;			/* Number of nodes in the list. */
@@ -47,22 +47,17 @@ typedef struct list_t
    list. You shuld pass a pointer to the function to be used to free the node
    value. For example, if your nodes point to a (char*) block, you can pass
    a pointer to a free(char *) .*/
-
 list_t * new_list (void (*)(void*));
 
 /* Release the memory used by a list (including all the nodes). */
-
 void release_list (list_t *);
 
 /* Append a node to the end of the list. */
-
 list_node_t * append_node (list_t *);
 
 /* Remove a node from the list (and free the node). */
-
 int del_node (list_t *, list_node_t *);
 
 /* Like strdup(), which is not ISO C. */
-
 
 #endif	/* LIST_H */

@@ -26,7 +26,7 @@ LADD = @PTHREAD_LIBS@
 
 bin_PROGRAMS = ghostshell
 
-ghostshell_SOURCES = main.c list.c parser.c run_commands.c debug.h list.h tparse.h run_commands.h
+ghostshell_SOURCES = main.c list.c parser.c run_commands.c debug.h list.h tparse.h run_commands.h job.h job.c
 
 ghostshell_LDADD = ../runcmd/libruncmd.la $(LIBOBJS) 
 
