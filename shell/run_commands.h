@@ -26,4 +26,6 @@ int run_commands_from_file(const char *);
 
 int run_pipe(char *cmd1, char *cmd2, int fg, int *io);
 
+int run_pipes(pipeline_t *p, int fg);
+
 #endif

@@ -121,7 +121,7 @@ int main(int argc, char **argv)
                         printf("No such job\n");
                     }
                     else {
-                        if(pipeline->narguments[0] > 0) {
+                        if(pipeline->command[0][1]) {
                             int num = atoi(pipeline->command[0][1]);
                             if(num < 0) {
                                 printf("Error: number must be positive\n");
@@ -133,7 +133,9 @@ int main(int argc, char **argv)
                                 n = n->next;
                                 i++;
                             }
-                            set_job_foreground(n->value->pid);
+                        }
+                        if(n) {
+                            set_job_foreground(n);
                         }
                     }
                 }
@@ -144,7 +146,7 @@ int main(int argc, char **argv)
                         printf("No such job\n");
                     }
                     else {
-                        if(pipeline->narguments[0] > 0) {
+                        if(pipeline->command[0][1]) {
                             int num = atoi(pipeline->command[0][1]);
                             if(num < 0) {
                                 printf("Error: number must be positive\n");
@@ -156,17 +158,21 @@ int main(int argc, char **argv)
                                 n = n->next;
                                 i++;
                             }
-                            set_job_background(n->value->pid);
+                        }
+                        if(n != NULL) {
+                            set_job_background(n);
                         }
                     }
                 }
                 else if(!strcmp(pipeline->command[0][0], "jobs"))
                 {
                     list_node_t *n = jobs->first;
+                    i = 1;
                     while(n)
                     {
                         printf("[%d]\t%d\t%s\n", i, n->value->pid, n->value->name);
-                        n = n->next;   
+                        n = n->next;
+                        i++;
                     }
                 }
                 else

@@ -175,3 +175,15 @@ int run_pipe(char *cmd1, char *cmd2, int fg, int *io)
 	return 1;
 }
 
+int run_pipes(pipeline_t *p, int fg)
+{
+	int pid, i, io[2], pfd[2];
+	/* stdin, stdout */
+	io[0] = 0;
+	io[1] = 1;
+
+	for (i = 0; i < p->ncommands; ++i)
+	{
+		
+	}
+}

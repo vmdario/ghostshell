@@ -47,7 +47,7 @@ void update_jobs_status()
 	/* delete all jobs terminated */
 	for (n = jobs->first; n; n = n->next)
 	{
-		if (n->value->status == 1)
+		if (n->value && n->value->status == 1)
 		{
 			printf("Process %d terminated\n", n->value->pid);
 			del_node(jobs, n);
@@ -55,23 +55,38 @@ void update_jobs_status()
 	}
 }
 
-int run_bg(int pid, char *name)
+int run_bg(int pid, int pgid, char *name)
 {
 	int i;
 	list_node_t *job = append_node(jobs);
 	job->value = malloc(sizeof(job_t));
 	job->value->pid = pid;
+	job->value->pgid = pgid;
 	job->value->status = 0;
 	strcpy(job->value->name, name);
-	return 0;
+	return waitpid(pid, NULL, WNOHANG|WUNTRACED);
 }
 
-int set_job_foreground(int pid)
+int set_job_foreground(list_node_t *n)
 {
+	int aux, status;
+	aux = tcsetpgrp(0, n->value->pgid);
+	sysfail (aux < 0, -1);
+	aux = kill(-n->value->pgid, SIGCONT);
+	sysfail (aux < 0, -1);
+	while(1)
+	{
+		aux = waitpid(-1, &status, WUNTRACED);
+		if(set_job_status(aux, status) < 0)
+			break;
+	}
+	sysfail (aux < 0, -1);
+	aux = tcsetpgrp(0, getpgid());
+	sysfail (aux < 0, -1);
 	return 0;
 }
 
-int set_job_background(int pid)
+int set_job_background(list_node_t *n)
 {
 	return 0;
 }
