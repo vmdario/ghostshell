@@ -12,7 +12,7 @@ struct _job_t
     int status; /* 0 - Stopped, 1 - Terminated */
     char name[RCMD_MAXARGS];
 };
-
+/* Update jobs status in shell */
 void update_jobs_status();
 
 int run_bg(int pid, int pgid, char *name);

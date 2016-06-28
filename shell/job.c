@@ -34,7 +34,7 @@ int set_job_status(int pid, int status)
 void update_jobs_status()
 {
 	int status, pid;
-	list_node_t *n;
+	list_node_t *n, *p;
 	for(;;)
 	{
 		/* check all background jobs status to delete from list */
@@ -47,10 +47,16 @@ void update_jobs_status()
 	/* delete all jobs terminated */
 	for (n = jobs->first; n; n = n->next)
 	{
-		if (n->value && n->value->status == 1)
-		{
-			printf("Process %d terminated\n", n->value->pid);
-			del_node(jobs, n);
+		if (n && n->value) {
+			if(n->value->status == 1) {
+				printf("Process %d terminated\n", n->value->pid);
+				p = n->previous;
+				del_node(jobs, n);
+				n = p;
+				if(!n) {
+					break;
+				}
+			}
 		}
 	}
 }

@@ -121,17 +121,20 @@ int run_commands_from_file(const char *path)
 	return 1;
 }
 
-int run_pipe(char *cmd1, char *cmd2, int fg, int *io)
+int run_pipe(int *pfd, char *cmd1, char *cmd2, int fg, int *io)
 {
     int i, aux, status;
-    int pfd[2], pid[2];
+    int pid[2];
     char *args1[RCMD_MAXARGS], *args2[RCMD_MAXARGS];
     char *cmd;
 
-    if( pipe(pfd) < 0 ) {
-        printf("Error: %s\n", strerror(errno));
-        return -1; /* error */
-    }
+    i = 0;
+    args1[i++] = strtok (cmd1, RCMD_DELIM);
+    while ((i < RCMD_MAXARGS) && (args1[i++] = strtok (NULL, RCMD_DELIM)));
+
+    i = 0;
+    args2[i++] = strtok (cmd2, RCMD_DELIM);
+    while ((i < RCMD_MAXARGS) && (args2[i++] = strtok (NULL, RCMD_DELIM)));
 
     /* Create a subprocess. */
     pid[0] = fork();
@@ -140,50 +143,32 @@ int run_pipe(char *cmd1, char *cmd2, int fg, int *io)
     if (pid[0] > 0)      /* Caller process (parent). */
     {
     	pid[1] = fork();
-        sysfail(pid[1] < 0, -1);
-
-		if (pid[1] > 0)
-		{
-			/* Parent */
-			/* Set stdout */
-			close(pfd[0]);
-			close(pfd[1]);
-			waitpid (pid[1], &status, 0);
-			printf ("Done waiting for more.\n");
-		}
-		else
-		{
-			/* Child */
-			/* Set stdin  */
-			close (pfd[1]);
-			dup2 (pfd[0], 0);
-			close (pfd[0]);
-
-			execvp (args2[0], args2);
-			exit(EXECFAILSTATUS);
-		}
+    	sysfail(pid[1] < 0, -1);
+    	/* second process */
+    	if(pid[1] > 0) {
+	    	/* run fg or bg */
+	        if(fg) {
+	            aux = wait(&status);
+	        }
+	        else {
+	            aux = run_bg(pid[1], getpgid(pid[1]), cmd2);
+	        }
+	        sysfail (aux < 0, -1);
+	    }
+	    else        /* Subprocess (child) */
+	    {
+	    	close(0);
+		    dup(pfd[0]);
+		    close(pfd[1]);
+		    execvp(args2[0], args2);
+	    }
     }
     else        /* Subprocess (child) */
     {
-    	close(pfd[0]);
-		dup2 (pfd[1], 1);
-		close (pfd[1]);
-
-		execvp(args1[0], args1);
-        exit (EXECFAILSTATUS);
+    	close(1);
+	    dup(pfd[1]);
+	    close(pfd[0]);
+	    execvp(args1[0], args1);
     }
 	return 1;
-}
-
-int run_pipes(pipeline_t *p, int fg)
-{
-	int pid, i, io[2], pfd[2];
-	/* stdin, stdout */
-	io[0] = 0;
-	io[1] = 1;
-
-	for (i = 0; i < p->ncommands; ++i)
-	{
-		
-	}
 }

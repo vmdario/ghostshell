@@ -181,7 +181,9 @@ int main(int argc, char **argv)
                     if(pipeline->ncommands > 1)
                     {
                         char *cmd1, cmd2[RCMD_MAXARGS];
+                        int pfd[2];
                         cmd1 = &cmd[0];
+                        io[0] = 0;
                         for(i = 0; i < pipeline->ncommands; i += 2)
                         {
                             memset(cmd1, 0, sizeof (cmd1)); /* cleaning cmd buffers */
@@ -198,11 +200,17 @@ int main(int argc, char **argv)
                                 strcat(cmd2, " ");
                             }
 
+                            /* creating pipe */
+                            if( pipe(pfd) < 0 ) {
+                                printf("Error: %s\n", strerror(errno));
+                                return -1; /* error */
+                            }
+
                             if(open_io(pipeline, io) < 0) {
                                 printf("Error: %s\n", strerror(errno));
                                 continue;
                             }
-                            run_pipe(cmd1, cmd2, RUN_FOREGROUND(pipeline), io);
+                            run_pipe(pfd, cmd1, cmd2, RUN_FOREGROUND(pipeline), io);
                             close_io(pipeline, io);
                         }
                     }
