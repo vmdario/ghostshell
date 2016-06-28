@@ -11,6 +11,7 @@ GhostShell is a simple POSIX shell based on POSIXeg project, https://gitlab.com/
 
 How to build:
 ```
+$ cd ghostshell
 $ ./autogen.sh
 $ ./configure
 $ make
