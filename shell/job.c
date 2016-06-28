@@ -70,10 +70,10 @@ int run_bg(int pid, int pgid, char *name)
 	job->value->pgid = pgid;
 	job->value->status = 0;
 	strcpy(job->value->name, name);
-	return waitpid(pid, NULL, WNOHANG|WUNTRACED);
+	return set_job_background(job);
 }
 
-int set_job_foreground(list_node_t *n)
+/*int set_job_foreground(list_node_t *n)
 {
 	int aux, status;
 	aux = tcsetpgrp(0, n->value->pgid);
@@ -90,9 +90,19 @@ int set_job_foreground(list_node_t *n)
 	aux = tcsetpgrp(0, getpgrp());
 	sysfail (aux < 0, -1);
 	return 0;
+}*/
+int set_job_foreground(list_node_t *n)
+{
+	int aux = kill(-n->value->pid, SIGCONT);
+	sysfail(aux < 0, -1);
+	tcsetpgrp(STDIN_FILENO, n->value->pgid);
+	aux = waitpid(n->value->pid, NULL, 0);
+	sysfail(aux < 0, -1);
+	tcsetpgrp(STDIN_FILENO, getpgid(0));
+	return aux;
 }
 
 int set_job_background(list_node_t *n)
 {
-	return 0;
+	return kill(-n->value->pgid, SIGCONT);
 }

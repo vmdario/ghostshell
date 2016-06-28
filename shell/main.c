@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <tparse.h>
 #include <debug.h>
@@ -44,9 +45,16 @@ int main(int argc, char **argv)
     int io[3];
     char cmd[RCMD_MAXARGS];
     pipeline_t *pipeline;
+    struct sigaction sigact;
+
+    setpgid(0, 0);
+    signal (SIGINT, SIG_IGN);
+    signal (SIGQUIT, SIG_IGN);
 
     getcwd(pwd, MAX_FILENAME);
-    io[0] = io[1] = io[2] = -1;
+    io[0] = 0;
+    io[1] = 1;
+    io[2] = 2;
     jobs = new_list(free);
 
     /*---------------- Checking if options or arguments are passed ------------------*/
@@ -280,4 +288,3 @@ void close_io(pipeline_t *pipeline, int *io)
         io[1] = -1;
     }
 }
-
