@@ -87,7 +87,7 @@ int set_job_foreground(list_node_t *n)
 			break;
 	}
 	sysfail (aux < 0, -1);
-	aux = tcsetpgrp(0, getpgid());
+	aux = tcsetpgrp(0, getpgrp());
 	sysfail (aux < 0, -1);
 	return 0;
 }
