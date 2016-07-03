@@ -116,6 +116,7 @@ int main(int argc, char **argv)
                         if(!chdir(pipeline->command[0][1])) {
                             /* success */
                             getcwd(pwd, MAX_FILENAME);
+                            setenv("PWD", pwd, 1);
                         }
                         else { /* fail */
                             printf("Error: %s\n", strerror(errno));
